@@ -1,4 +1,8 @@
 spring:
+  datasource:
+    # Local development - Reporting user
+    username: report_user
+    password: ${DB_PASSWORD:ReportingBD101!}
   jpa:
     show-sql: true
 
