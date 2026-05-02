@@ -14,12 +14,12 @@ class ExhaustiveDtoTest {
         CuentaReporteResponseDto base = new CuentaReporteResponseDto(id, "123", "A", "ACT", BigDecimal.TEN);
         CuentaReporteResponseDto same = new CuentaReporteResponseDto(id, "123", "A", "ACT", BigDecimal.TEN);
         
-        // Basic equals
-        assertEquals(base, base);
-        assertEquals(base, same);
+        // Equals/HashCode branches
+        assertTrue(base.equals(base));
+        assertTrue(base.equals(same));
+        assertFalse(base.equals(null));
+        assertFalse(base.equals(new Object()));
         assertEquals(base.hashCode(), same.hashCode());
-        assertNotEquals(base, null);
-        assertNotEquals(base, new Object());
         
         // Branch coverage: one field null in 'this'
         assertNotEquals(new CuentaReporteResponseDto(null, "123", "A", "ACT", BigDecimal.TEN), base);
@@ -70,7 +70,8 @@ class ExhaustiveDtoTest {
     @Test
     void testResumenMovimientosResponseDtoExhaustive() {
         ResumenMovimientosResponseDto base = new ResumenMovimientosResponseDto(BigDecimal.TEN, BigDecimal.ONE, 5);
-        assertEquals(base, base);
+        assertTrue(base.equals(base));
+        assertFalse(base.equals(null));
         
         assertNotEquals(base, new ResumenMovimientosResponseDto(null, BigDecimal.ONE, 5));
         assertNotEquals(base, new ResumenMovimientosResponseDto(BigDecimal.TEN, null, 5));
@@ -86,7 +87,7 @@ class ExhaustiveDtoTest {
     void testSaldoTotalClienteResponseDtoExhaustive() {
         UUID cid = UUID.randomUUID();
         SaldoTotalClienteResponseDto base = new SaldoTotalClienteResponseDto(cid, BigDecimal.TEN);
-        assertEquals(base, base);
+        assertTrue(base.equals(base));
         
         assertNotEquals(base, new SaldoTotalClienteResponseDto(null, BigDecimal.TEN));
         assertNotEquals(base, new SaldoTotalClienteResponseDto(cid, null));

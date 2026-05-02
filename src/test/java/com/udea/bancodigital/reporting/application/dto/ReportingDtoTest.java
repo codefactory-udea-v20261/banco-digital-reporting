@@ -61,9 +61,9 @@ class ReportingDtoTest {
                 .descripcion("Test")
                 .build();
 
-        assertEquals(dto, dto);
-        assertNotEquals(dto, null);
-        assertNotEquals(dto, "string");
+        assertTrue(dto.equals(dto));
+        assertFalse(dto.equals(null));
+        assertFalse(dto.equals("string"));
         
         // Test each field for inequality
         assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(UUID.randomUUID()).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build());
@@ -82,7 +82,7 @@ class ReportingDtoTest {
                 .totalEgresos(new BigDecimal("200.00"))
                 .build();
 
-        assertEquals(dto, dto);
+        assertTrue(dto.equals(dto));
         assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(6).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("200.00")).build());
         assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("501.00")).totalEgresos(new BigDecimal("200.00")).build());
         assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("201.00")).build());
@@ -96,7 +96,7 @@ class ReportingDtoTest {
                 .saldoTotal(new BigDecimal("5000.00"))
                 .build();
 
-        assertEquals(dto, dto);
+        assertTrue(dto.equals(dto));
         assertNotEquals(dto, SaldoTotalClienteResponseDto.builder().clienteId(UUID.randomUUID()).saldoTotal(new BigDecimal("5000.00")).build());
         assertNotEquals(dto, SaldoTotalClienteResponseDto.builder().clienteId(clienteId).saldoTotal(new BigDecimal("5001.00")).build());
     }
