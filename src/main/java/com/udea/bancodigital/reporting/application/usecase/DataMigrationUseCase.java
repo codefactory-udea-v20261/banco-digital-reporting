@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
+
 @Service
+@Profile("!prod")
 public class DataMigrationUseCase implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataMigrationUseCase.class);
