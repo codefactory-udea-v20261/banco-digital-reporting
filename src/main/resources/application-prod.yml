@@ -13,3 +13,16 @@ server:
   error:
     include-message: never
     include-stacktrace: never
+
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+spring:
+  zipkin:
+    enabled: false
+  kafka:
+    listener:
+      auto-startup: false
