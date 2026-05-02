@@ -2,6 +2,11 @@ spring:
   cloud:
     vault:
       enabled: false
+    discovery:
+      enabled: false
+eureka:
+  client:
+    enabled: false
   datasource:
     url: jdbc:tc:postgresql:16-alpine:///banco_digital_reporting_it?TC_DAEMON=true
     username: test
