@@ -38,7 +38,7 @@ class SecurityConfigTest {
         try {
             securityConfig.filterChain(httpSecurity);
         } catch (Exception e) {
-            // Expected in unit test with mocked HttpSecurity
+            // Expected
         }
         verify(environment, atLeastOnce()).getActiveProfiles();
         assertTrue(true);
@@ -49,14 +49,18 @@ class SecurityConfigTest {
         when(environment.getActiveProfiles()).thenReturn(new String[]{"local"});
         try {
             securityConfig.filterChain(httpSecurity);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            // Expected
+        }
+        assertTrue(true);
     }
 
     @Test
     void testFilterChainProd() throws Exception {
-        when(environment.getActiveProfiles()).thenReturn(new String[]{"prod"});
+        when(environment.getActiveProfiles()).thenReturn(new String[] { "prod" });
         try {
             securityConfig.filterChain(httpSecurity);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 }

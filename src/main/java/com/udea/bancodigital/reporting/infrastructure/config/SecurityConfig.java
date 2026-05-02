@@ -30,6 +30,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        boolean isDev = Arrays.asList(environment.getActiveProfiles()).contains("dev") ||
+                       Arrays.asList(environment.getActiveProfiles()).contains("local");
+
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -42,6 +45,11 @@ public class SecurityConfig {
                 .authenticationEntryPoint((request, response, authException) ->
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
             )
+            .headers(headers -> {
+                if (isDev) {
+                    headers.frameOptions(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.sameOrigin());
+                }
+            })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
