@@ -36,5 +36,4 @@ ENTRYPOINT [ "java", \
     "-XX:+UnlockExperimentalVMOptions", \
     "-XX:+UseContainerSupport", \
     "-XX:MaxRAMPercentage=75.0", \
-    "-Dspring.profiles.active=${APP_PROFILE}", \
     "-jar", "app.jar" ]
