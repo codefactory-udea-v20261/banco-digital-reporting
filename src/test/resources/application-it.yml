@@ -1,4 +1,7 @@
 spring:
+  cloud:
+    vault:
+      enabled: false
   datasource:
     url: jdbc:tc:postgresql:16-alpine:///banco_digital_reporting_it?TC_DAEMON=true
     username: test
@@ -17,6 +20,11 @@ app:
   security:
     jwt:
       secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
+
+management:
+  health:
+    vault:
+      enabled: false
 
 logging:
   level:
