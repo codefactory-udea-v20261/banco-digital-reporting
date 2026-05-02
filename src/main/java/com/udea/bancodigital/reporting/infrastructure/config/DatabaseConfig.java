@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class DatabaseConfig {
@@ -32,6 +33,7 @@ public class DatabaseConfig {
     }
 
     @Bean(name = "coreDataSource")
+    @Profile("!prod")
     @ConfigurationProperties(prefix = "core.datasource")
     public HikariDataSource coreDataSource() {
         return new HikariDataSource();
@@ -43,6 +45,7 @@ public class DatabaseConfig {
     }
 
     @Bean(name = "coreJdbcTemplate")
+    @Profile("!prod")
     public JdbcTemplate coreJdbcTemplate(@Qualifier("coreDataSource") DataSource coreDataSource) {
         return new JdbcTemplate(coreDataSource);
     }
@@ -54,6 +57,7 @@ public class DatabaseConfig {
     }
 
     @Bean(name = "coreNamedParameterJdbcTemplate")
+    @Profile("!prod")
     public NamedParameterJdbcTemplate coreNamedParameterJdbcTemplate(@Qualifier("coreDataSource") DataSource coreDataSource) {
         return new NamedParameterJdbcTemplate(coreDataSource);
     }

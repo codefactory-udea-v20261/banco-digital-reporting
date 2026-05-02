@@ -51,7 +51,7 @@ public class DatabaseInitializer {
         String baseUrl = dbUrl.substring(0, dbUrl.lastIndexOf("/") + 1) + "postgres";
 
         try (Connection conn = DriverManager.getConnection(baseUrl, username, password);
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             ResultSet resultSet = conn.getMetaData().getCatalogs();
             boolean exists = false;
