@@ -1,4 +1,9 @@
 spring:
+  zipkin:
+    enabled: false
+  kafka:
+    listener:
+      auto-startup: false
   datasource:
     url: jdbc:postgresql:///${DB_NAME:banco_digital_reporting}?cloudSqlInstance=${CLOUD_SQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=${DB_USERNAME:report_user}&password=${DB_PASSWORD:ReportingBD101!}
   jpa:
@@ -19,10 +24,3 @@ eureka:
     enabled: false
     registerWithEureka: false
     fetchRegistry: false
-
-spring:
-  zipkin:
-    enabled: false
-  kafka:
-    listener:
-      auto-startup: false
