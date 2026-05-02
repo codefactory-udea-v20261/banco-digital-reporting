@@ -26,15 +26,50 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(
             BusinessException ex, HttpServletRequest request) {
+        return buildErrorResponse(ex.getErrorCode(), ex.getMessage(), ex.getHttpStatus(), request);
+    }
+
+    @ExceptionHandler(ClienteYaExisteException.class)
+    public ResponseEntity<ApiResponse<Void>> handleClienteYaExisteException(
+            ClienteYaExisteException ex, HttpServletRequest request) {
+        return buildErrorResponse("CLIENTE_EXISTE", ex.getMessage(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCredencialesInvalidasException(
+            CredencialesInvalidasException ex, HttpServletRequest request) {
+        return buildErrorResponse("AUTH_FAILED", ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(CuentaBloqueadaException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCuentaBloqueadaException(
+            CuentaBloqueadaException ex, HttpServletRequest request) {
+        return buildErrorResponse("ACCOUNT_LOCKED", ex.getMessage(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(DatosIncompletosException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDatosIncompletosException(
+            DatosIncompletosException ex, HttpServletRequest request) {
+        return buildErrorResponse("INVALID_DATA", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(MfaRequeridoException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMfaRequeridoException(
+            MfaRequeridoException ex, HttpServletRequest request) {
+        return buildErrorResponse("MFA_REQUIRED", ex.getMessage(), HttpStatus.ACCEPTED, request);
+    }
+
+    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(
+            String errorCode, String message, HttpStatus status, HttpServletRequest request) {
         String traceId = generateTraceId();
-        log.warn("[{}] BusinessException: {} — path={}", traceId, ex.getMessage(), request.getRequestURI());
+        log.warn("[{}] {}: {} — path={}", traceId, errorCode, message, request.getRequestURI());
         ApiError error = ApiError.builder()
-                .errorCode(ex.getErrorCode())
-                .message(ex.getMessage())
+                .errorCode(errorCode)
+                .message(message)
                 .traceId(traceId)
-                .httpStatus(ex.getHttpStatus().value())
+                .httpStatus(status.value())
                 .build();
-        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(error));
+        return ResponseEntity.status(status).body(ApiResponse.error(error));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
