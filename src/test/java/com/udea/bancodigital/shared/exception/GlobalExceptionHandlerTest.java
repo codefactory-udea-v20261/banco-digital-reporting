@@ -86,4 +86,20 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ApiResponse<Void>> response = handler.handleMfaRequeridoException(ex, request);
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
     }
+
+    @Test
+    void handleValidationException_DebeRetornarBadRequest() {
+        org.springframework.web.bind.MethodArgumentNotValidException ex = mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
+        org.springframework.validation.BindingResult br = mock(org.springframework.validation.BindingResult.class);
+        org.springframework.validation.FieldError fe = new org.springframework.validation.FieldError("obj", "field", "default message");
+        
+        when(ex.getBindingResult()).thenReturn(br);
+        when(br.getFieldErrors()).thenReturn(java.util.List.of(fe));
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleValidationException(ex, request);
+        
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Los datos enviados no son válidos", response.getBody().getError().getMessage());
+        assertEquals(1, response.getBody().getError().getDetails().size());
+    }
 }

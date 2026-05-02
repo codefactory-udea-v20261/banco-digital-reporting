@@ -7,20 +7,32 @@ import static org.junit.jupiter.api.Assertions.*;
 class SharedUtilTest {
 
     @Test
-    void testAuditableEntity() {
+    void testAuditableEntityPrePersist() {
         TestAuditableEntity entity = new TestAuditableEntity();
-        Instant now = Instant.now();
         
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
-        entity.setCreatedBy("admin");
-        entity.setUpdatedBy("admin");
+        entity.prePersist();
 
-        assertEquals(now, entity.getCreatedAt());
-        assertEquals(now, entity.getUpdatedAt());
-        assertEquals("admin", entity.getCreatedBy());
-        assertEquals("admin", entity.getUpdatedBy());
+        assertNotNull(entity.getCreatedAt());
+        assertNotNull(entity.getUpdatedAt());
+        assertEquals("SYSTEM", entity.getCreatedBy());
+        assertEquals("SYSTEM", entity.getUpdatedBy());
     }
 
-    private static class TestAuditableEntity extends AuditableEntity {}
+    @Test
+    void testAuditableEntityPreUpdate() {
+        TestAuditableEntity entity = new TestAuditableEntity();
+        entity.setCreatedBy("admin");
+        entity.prePersist();
+        
+        entity.setUpdatedBy(null);
+        entity.preUpdate();
+
+        assertNotNull(entity.getUpdatedAt());
+        assertEquals("SYSTEM", entity.getUpdatedBy());
+    }
+
+    private static class TestAuditableEntity extends AuditableEntity {
+        @Override public void prePersist() { super.prePersist(); }
+        @Override public void preUpdate() { super.preUpdate(); }
+    }
 }

@@ -1,11 +1,14 @@
 package com.udea.bancodigital.reporting.application.dto;
 
 import org.junit.jupiter.api.Test;
+import com.udea.bancodigital.shared.event.DomainEvent;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ReportingDtoTest {
@@ -13,61 +16,62 @@ class ReportingDtoTest {
     @Test
     void testCuentaReporteResponseDto() {
         UUID id = UUID.randomUUID();
-        CuentaReporteResponseDto dto = CuentaReporteResponseDto.builder()
+        CuentaReporteResponseDto dto1 = CuentaReporteResponseDto.builder()
                 .cuentaId(id)
                 .numeroCuenta("123456")
-                .tipoCuenta("AHORROS")
-                .estado("ACTIVA")
                 .saldoActual(new BigDecimal("1000.00"))
                 .build();
+        CuentaReporteResponseDto dto2 = CuentaReporteResponseDto.builder()
+                .cuentaId(id)
+                .numeroCuenta("123456")
+                .saldoActual(new BigDecimal("1000.00"))
+                .build();
+        CuentaReporteResponseDto dto3 = CuentaReporteResponseDto.builder()
+                .cuentaId(id)
+                .numeroCuenta("654321")
+                .saldoActual(new BigDecimal("2000.00"))
+                .build();
 
-        assertEquals(id, dto.getCuentaId());
-        assertEquals("123456", dto.getNumeroCuenta());
-        assertEquals("AHORROS", dto.getTipoCuenta());
-        assertEquals("ACTIVA", dto.getEstado());
-        assertEquals(new BigDecimal("1000.00"), dto.getSaldoActual());
-        assertNotNull(dto.toString());
-        assertEquals(dto, dto);
-        assertNotNull(dto.hashCode());
+        assertEquals(dto1, dto2);
+        assertNotEquals(dto1, dto3);
+        assertNotEquals(dto1, null);
+        assertNotEquals(dto1, new Object());
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+        assertNotNull(dto1.toString());
     }
 
     @Test
     void testMovimientoReporteResponseDto() {
         UUID id = UUID.randomUUID();
-        UUID cId = UUID.randomUUID();
         Instant now = Instant.now();
-        MovimientoReporteResponseDto dto = MovimientoReporteResponseDto.builder()
+        MovimientoReporteResponseDto dto1 = MovimientoReporteResponseDto.builder()
                 .movimientoId(id)
-                .cuentaId(cId)
                 .tipoMovimiento("DEBITO")
-                .monto(new BigDecimal("50.00"))
-                .fecha(now)
-                .descripcion("Test")
+                .build();
+        MovimientoReporteResponseDto dto2 = MovimientoReporteResponseDto.builder()
+                .movimientoId(id)
+                .tipoMovimiento("DEBITO")
+                .build();
+        MovimientoReporteResponseDto dto3 = MovimientoReporteResponseDto.builder()
+                .movimientoId(UUID.randomUUID())
+                .tipoMovimiento("CREDITO")
                 .build();
 
-        assertEquals(id, dto.getMovimientoId());
-        assertEquals(cId, dto.getCuentaId());
-        assertEquals("DEBITO", dto.getTipoMovimiento());
-        assertEquals(new BigDecimal("50.00"), dto.getMonto());
-        assertEquals(now, dto.getFecha());
-        assertEquals("Test", dto.getDescripcion());
-        assertNotNull(dto.toString());
-        assertEquals(dto, dto);
+        assertEquals(dto1, dto2);
+        assertNotEquals(dto1, dto3);
+        assertNotEquals(dto1, null);
+        assertNotNull(dto1.toString());
     }
 
     @Test
     void testResumenMovimientosResponseDto() {
-        ResumenMovimientosResponseDto dto = ResumenMovimientosResponseDto.builder()
-                .totalIngresos(new BigDecimal("2000.00"))
-                .totalEgresos(new BigDecimal("500.00"))
-                .cantidadMovimientos(10)
-                .build();
+        ResumenMovimientosResponseDto dto1 = ResumenMovimientosResponseDto.builder().cantidadMovimientos(1).build();
+        ResumenMovimientosResponseDto dto2 = ResumenMovimientosResponseDto.builder().cantidadMovimientos(1).build();
+        ResumenMovimientosResponseDto dto3 = ResumenMovimientosResponseDto.builder().cantidadMovimientos(2).build();
 
-        assertEquals(new BigDecimal("2000.00"), dto.getTotalIngresos());
-        assertEquals(new BigDecimal("500.00"), dto.getTotalEgresos());
-        assertEquals(10, dto.getCantidadMovimientos());
-        assertNotNull(dto.toString());
-        assertEquals(dto, dto);
+        assertEquals(dto1, dto2);
+        assertNotEquals(dto1, dto3);
+        assertNotEquals(dto1, null);
     }
 
     @Test
@@ -77,5 +81,18 @@ class ReportingDtoTest {
                 .build();
 
         assertEquals(new BigDecimal("5000.00"), dto.getSaldoTotal());
+    }
+
+    @Test
+    void testDomainEvent() {
+        DomainEvent event1 = DomainEvent.builder().eventId("1").build();
+        DomainEvent event2 = DomainEvent.builder().eventId("1").build();
+        DomainEvent event3 = DomainEvent.builder().eventId("2").build();
+
+        assertEquals(event1, event2);
+        assertNotEquals(event1, event3);
+        assertNotEquals(event1, null);
+        assertNotNull(event1.toString());
+        assertEquals(event1.hashCode(), event2.hashCode());
     }
 }

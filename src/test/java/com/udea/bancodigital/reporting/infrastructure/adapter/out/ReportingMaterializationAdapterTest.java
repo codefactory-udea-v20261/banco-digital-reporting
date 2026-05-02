@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 /**
  * Integration tests for Reporting Materialization Adapter with Circuit Breaker.
@@ -186,4 +190,5 @@ class ReportingMaterializationAdapterTest {
             .isBetween(beforeCall, afterCall);
         log.info("✓ Event timestamp captured correctly");
     }
+
 }
