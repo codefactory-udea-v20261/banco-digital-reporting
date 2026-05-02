@@ -1,6 +1,7 @@
 package com.udea.bancodigital.reporting.infrastructure.security;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
@@ -17,11 +18,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,21 +43,17 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        // Generar una clave válida de 256 bits para HMAC-SHA
-        key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+        key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
         secret = Encoders.BASE64.encode(key.getEncoded());
-        
         ReflectionTestUtils.setField(filter, "jwtSecret", secret);
         SecurityContextHolder.clearContext();
     }
 
     @Test
-    void doFilterInternal_DebeAutenticar_CuandoTokenEsValido() throws Exception {
+    void doFilterInternal_WithValidToken() throws Exception {
         String token = Jwts.builder()
-                .subject("testuser")
-                .claim("roles", List.of("ROLE_CLIENTE"))
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
+                .setSubject("user123")
+                .claim("roles", List.of("ADMIN"))
                 .signWith(key)
                 .compact();
 
@@ -66,12 +61,46 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
+        assertEquals("user123", auth.getName());
+        assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
         verify(filterChain).doFilter(request, response);
     }
 
     @Test
-    void doFilterInternal_NoDebeAutenticar_CuandoNoHayHeader() throws Exception {
+    void doFilterInternal_WithValidTokenExistingRolePrefix() throws Exception {
+        String token = Jwts.builder()
+                .setSubject("user123")
+                .claim("roles", List.of("ROLE_USER"))
+                .signWith(key)
+                .compact();
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+    }
+
+    @Test
+    void doFilterInternal_WithValidTokenNoRoles() throws Exception {
+        String token = Jwts.builder()
+                .setSubject("user123")
+                .signWith(key)
+                .compact();
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE")));
+    }
+
+    @Test
+    void doFilterInternal_NoToken() throws Exception {
         when(request.getHeader("Authorization")).thenReturn(null);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -81,8 +110,28 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_NoDebeAutenticar_CuandoTokenEsInvalido() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer token_invalido");
+    void doFilterInternal_InvalidHeader() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Basic 123");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void doFilterInternal_NoSecretConfigured() throws Exception {
+        ReflectionTestUtils.setField(filter, "jwtSecret", "");
+        String token = "any.token.here";
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void doFilterInternal_InvalidToken() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer invalid.token.here");
 
         filter.doFilterInternal(request, response, filterChain);
 

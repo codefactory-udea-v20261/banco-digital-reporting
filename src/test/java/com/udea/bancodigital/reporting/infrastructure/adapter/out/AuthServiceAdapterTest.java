@@ -1,78 +1,57 @@
 package com.udea.bancodigital.reporting.infrastructure.adapter.out;
 
 import com.udea.bancodigital.shared.security.AuthenticatedUser;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class AuthServiceAdapterTest {
 
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
-
-    @InjectMocks
-    private AuthServiceAdapter authServiceAdapter;
+    private AuthServiceAdapter adapter;
 
     @BeforeEach
     void setUp() {
-        SecurityContextHolder.setContext(securityContext);
-    }
-
-    @AfterEach
-    void tearDown() {
+        adapter = new AuthServiceAdapter();
         SecurityContextHolder.clearContext();
     }
 
     @Test
-    void getClienteId_DebeRetornarUuid_CuandoUsuarioEstaAutenticado() {
-
+    void getClienteId_Success() {
+        UUID userId = UUID.randomUUID();
         UUID clienteId = UUID.randomUUID();
-        AuthenticatedUser user = new AuthenticatedUser(UUID.randomUUID(), "testuser", clienteId);
+        AuthenticatedUser user = new AuthenticatedUser(userId, "test", clienteId);
+        var auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(user);
-
-        UUID result = authServiceAdapter.getClienteId();
-
-        assertEquals(clienteId, result);
+        assertEquals(clienteId, adapter.getClienteId());
     }
 
     @Test
-    void getClienteId_DebeLanzarExcepcion_CuandoNoHayAutenticacion() {
-
-        when(securityContext.getAuthentication()).thenReturn(null);
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> authServiceAdapter.getClienteId());
-        assertEquals("No hay un usuario autenticado en el contexto de seguridad", exception.getMessage());
+    void getClienteId_NoAuthentication_ThrowsException() {
+        assertThrows(IllegalStateException.class, () -> adapter.getClienteId());
     }
 
     @Test
-    void getClienteId_DebeLanzarExcepcion_CuandoClienteIdEsNull() {
+    void getClienteId_InvalidPrincipal_ThrowsException() {
+        var auth = new UsernamePasswordAuthenticationToken("wrong principal", null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        AuthenticatedUser user = new AuthenticatedUser(UUID.randomUUID(), "testuser", null);
+        assertThrows(IllegalStateException.class, () -> adapter.getClienteId());
+    }
 
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(user);
+    @Test
+    void getClienteId_NoClienteId_ThrowsException() {
+        UUID userId = UUID.randomUUID();
+        AuthenticatedUser user = new AuthenticatedUser(userId, "test", null);
+        var auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> authServiceAdapter.getClienteId());
-        assertEquals("El usuario autenticado no tiene un cliente asociado", exception.getMessage());
+        assertThrows(IllegalStateException.class, () -> adapter.getClienteId());
     }
 }
