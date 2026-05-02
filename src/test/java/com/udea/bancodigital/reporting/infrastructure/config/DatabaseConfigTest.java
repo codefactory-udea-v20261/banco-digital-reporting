@@ -1,8 +1,6 @@
 package com.udea.bancodigital.reporting.infrastructure.config;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-
 import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

@@ -42,7 +42,7 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        key = Jwts.SIG.HS256.key().build();
         secret = Encoders.BASE64.encode(key.getEncoded());
         ReflectionTestUtils.setField(filter, "jwtSecret", secret);
         SecurityContextHolder.clearContext();

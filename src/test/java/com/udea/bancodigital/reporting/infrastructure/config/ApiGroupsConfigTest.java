@@ -3,7 +3,6 @@ package com.udea.bancodigital.reporting.infrastructure.config;
 import org.junit.jupiter.api.Test;
 import org.springdoc.core.models.GroupedOpenApi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ApiGroupsConfigTest {

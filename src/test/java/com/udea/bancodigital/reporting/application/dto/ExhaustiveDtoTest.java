@@ -49,9 +49,9 @@ class ExhaustiveDtoTest {
         Instant now = Instant.now();
         MovimientoReporteResponseDto base = new MovimientoReporteResponseDto(mid, cid, "T", BigDecimal.TEN, "D", now);
         
-        assertEquals(base, base);
-        assertEquals(base, new MovimientoReporteResponseDto(mid, cid, "T", BigDecimal.TEN, "D", now));
-        assertNotEquals(base, null);
+        assertTrue(base.equals(base)); // NOSONAR
+        assertEquals(new MovimientoReporteResponseDto(mid, cid, "T", BigDecimal.TEN, "D", now), base);
+        assertNotEquals(null, base);
         
         // Null branches
         assertNotEquals(new MovimientoReporteResponseDto(null, cid, "T", BigDecimal.TEN, "D", now), base);

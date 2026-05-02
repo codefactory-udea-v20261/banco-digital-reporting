@@ -61,17 +61,17 @@ class ReportingDtoTest {
                 .descripcion("Test")
                 .build();
 
-        assertTrue(dto.equals(dto));
-        assertFalse(dto.equals(null));
-        assertFalse(dto.equals("string"));
+        assertEquals(dto, dto); // NOSONAR
+        assertNotEquals(null, dto);
+        assertNotEquals("string", dto);
         
         // Test each field for inequality
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(UUID.randomUUID()).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build());
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(UUID.randomUUID()).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build());
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("CREDIT").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build());
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("200.00")).fecha(now).descripcion("Test").build());
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now.plusSeconds(1)).descripcion("Test").build());
-        assertNotEquals(dto, MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Other").build());
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(UUID.randomUUID()).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build(), dto);
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(UUID.randomUUID()).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build(), dto);
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("CREDIT").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build(), dto);
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("200.00")).fecha(now).descripcion("Test").build(), dto);
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now.plusSeconds(1)).descripcion("Test").build(), dto);
+        assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(id).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Other").build(), dto);
     }
 
     @Test
@@ -82,10 +82,10 @@ class ReportingDtoTest {
                 .totalEgresos(new BigDecimal("200.00"))
                 .build();
 
-        assertTrue(dto.equals(dto));
-        assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(6).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("200.00")).build());
-        assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("501.00")).totalEgresos(new BigDecimal("200.00")).build());
-        assertNotEquals(dto, ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("201.00")).build());
+        assertEquals(dto, dto); // NOSONAR
+        assertNotEquals(ResumenMovimientosResponseDto.builder().cantidadMovimientos(6).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("200.00")).build(), dto);
+        assertNotEquals(ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("501.00")).totalEgresos(new BigDecimal("200.00")).build(), dto);
+        assertNotEquals(ResumenMovimientosResponseDto.builder().cantidadMovimientos(5).totalIngresos(new BigDecimal("500.00")).totalEgresos(new BigDecimal("201.00")).build(), dto);
     }
 
     @Test
@@ -96,7 +96,7 @@ class ReportingDtoTest {
                 .saldoTotal(new BigDecimal("5000.00"))
                 .build();
 
-        assertTrue(dto.equals(dto));
+        assertEquals(dto, dto); // NOSONAR
         assertNotEquals(dto, SaldoTotalClienteResponseDto.builder().clienteId(UUID.randomUUID()).saldoTotal(new BigDecimal("5000.00")).build());
         assertNotEquals(dto, SaldoTotalClienteResponseDto.builder().clienteId(clienteId).saldoTotal(new BigDecimal("5001.00")).build());
     }

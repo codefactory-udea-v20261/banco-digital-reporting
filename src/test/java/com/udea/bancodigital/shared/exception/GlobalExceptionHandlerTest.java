@@ -1,6 +1,5 @@
 package com.udea.bancodigital.shared.exception;
 
-import com.udea.bancodigital.shared.web.ApiError;
 import com.udea.bancodigital.shared.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;

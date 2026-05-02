@@ -47,7 +47,7 @@ public class SecurityConfig {
             )
             .headers(headers -> {
                 if (isDev) {
-                    headers.frameOptions(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.sameOrigin());
+                    headers.frameOptions(org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::sameOrigin);
                 }
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
