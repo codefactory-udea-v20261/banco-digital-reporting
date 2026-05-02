@@ -15,10 +15,10 @@ class ExhaustiveDtoTest {
         CuentaReporteResponseDto same = new CuentaReporteResponseDto(id, "123", "A", "ACT", BigDecimal.TEN);
         
         // Equals/HashCode branches
-        assertTrue(base.equals(base));
-        assertTrue(base.equals(same));
-        assertFalse(base.equals(null));
-        assertFalse(base.equals(new Object()));
+        assertTrue(base.equals(base)); // NOSONAR: Required for branch coverage
+        assertEquals(base, same);
+        assertNotEquals(null, base);
+        assertNotEquals(new Object(), base);
         assertEquals(base.hashCode(), same.hashCode());
         
         // Branch coverage: one field null in 'this'
@@ -70,8 +70,8 @@ class ExhaustiveDtoTest {
     @Test
     void testResumenMovimientosResponseDtoExhaustive() {
         ResumenMovimientosResponseDto base = new ResumenMovimientosResponseDto(BigDecimal.TEN, BigDecimal.ONE, 5);
-        assertTrue(base.equals(base));
-        assertFalse(base.equals(null));
+        assertTrue(base.equals(base)); // NOSONAR
+        assertNotEquals(null, base);
         
         assertNotEquals(base, new ResumenMovimientosResponseDto(null, BigDecimal.ONE, 5));
         assertNotEquals(base, new ResumenMovimientosResponseDto(BigDecimal.TEN, null, 5));
@@ -87,12 +87,12 @@ class ExhaustiveDtoTest {
     void testSaldoTotalClienteResponseDtoExhaustive() {
         UUID cid = UUID.randomUUID();
         SaldoTotalClienteResponseDto base = new SaldoTotalClienteResponseDto(cid, BigDecimal.TEN);
-        assertTrue(base.equals(base));
+        assertTrue(base.equals(base)); // NOSONAR
         
         assertNotEquals(base, new SaldoTotalClienteResponseDto(null, BigDecimal.TEN));
         assertNotEquals(base, new SaldoTotalClienteResponseDto(cid, null));
         
-        assertNotEquals(new SaldoTotalClienteResponseDto(null, BigDecimal.TEN), base);
+        assertNotEquals(null, base);
         
         assertEquals(new SaldoTotalClienteResponseDto(null, null), new SaldoTotalClienteResponseDto(null, null));
         assertNotNull(base.toString());

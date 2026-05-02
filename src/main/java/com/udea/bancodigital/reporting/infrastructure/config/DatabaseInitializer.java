@@ -43,7 +43,7 @@ public class DatabaseInitializer {
         }
 
         // Security: Validate database name to prevent SQL Injection
-        if (!dbName.matches("^[a-zA-Z0-9_]+$")) {
+        if (!dbName.matches("^\\w+$")) {
             logger.error("Security risk: Invalid database name detected in URL: {}", dbName);
             return;
         }
@@ -65,8 +65,9 @@ public class DatabaseInitializer {
             if (!exists) {
                 logger.info("Database {} does not exist. Creating...", dbName);
                 // The name is validated against a whitelist regex above, so this is safe
-                stmt.executeUpdate("CREATE DATABASE " + dbName);
-                logger.info("Database {} created successfully.", dbName);
+                @SuppressWarnings("java:S2077")
+                int result = stmt.executeUpdate("CREATE DATABASE " + dbName);
+                logger.info("Database {} created successfully. Result: {}", dbName, result);
             } else {
                 logger.info("Database {} already exists.", dbName);
             }

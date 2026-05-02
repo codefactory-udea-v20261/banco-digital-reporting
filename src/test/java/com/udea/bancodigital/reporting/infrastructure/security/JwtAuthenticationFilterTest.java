@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +51,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_WithValidToken() throws Exception {
         String token = Jwts.builder()
-                .setSubject("user123")
+                .subject("user123")
                 .claim("roles", List.of("ADMIN"))
                 .signWith(key)
                 .compact();
@@ -71,7 +70,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_WithValidTokenExistingRolePrefix() throws Exception {
         String token = Jwts.builder()
-                .setSubject("user123")
+                .subject("user123")
                 .claim("roles", List.of("ROLE_USER"))
                 .signWith(key)
                 .compact();
@@ -87,7 +86,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_WithValidTokenNoRoles() throws Exception {
         String token = Jwts.builder()
-                .setSubject("user123")
+                .subject("user123")
                 .signWith(key)
                 .compact();
 

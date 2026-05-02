@@ -30,9 +30,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        boolean isDev = Arrays.asList(environment.getActiveProfiles()).contains("dev") ||
-                       Arrays.asList(environment.getActiveProfiles()).contains("local");
-
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
