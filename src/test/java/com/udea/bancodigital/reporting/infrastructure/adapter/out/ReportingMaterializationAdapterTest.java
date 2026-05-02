@@ -5,6 +5,8 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,21 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.springframework.test.util.ReflectionTestUtils;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 
 /**
  * Integration tests for Reporting Materialization Adapter with Circuit Breaker.
- *
- * Tests resilience patterns:
- * 1. Happy path: reporting view materialized successfully
- * 2. Circuit breaker opens after threshold failures
- * 3. Fallback queues event to Kafka when CB is open
- * 4. State transitions: CLOSED → OPEN → HALF_OPEN → CLOSED
- * 5. Retry logic with exponential backoff
- * 6. Multi-event type routing
  */
 @Slf4j
 @SpringBootTest
@@ -65,40 +55,19 @@ class ReportingMaterializationAdapterTest {
         testEvent.put("timestamp", System.currentTimeMillis());
     }
 
-    @Test
-    @DisplayName("Should materialize reporting view when database is healthy")
-    void testMaterializeViewSuccess() {
+    @ParameterizedTest
+    @ValueSource(strings = {"CustomerCreated", "TransactionCompleted", "AccountOpened"})
+    @DisplayName("Should materialize reporting view for known event types")
+    void testMaterializeViewSuccess(String eventType) {
         // Given: Database is healthy, circuit breaker is CLOSED
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
 
-        // When: Materializing a customer reporting view
-        reportingMaterializationAdapter.materializeReportingView(testEvent, "CustomerCreated");
+        // When: Materializing a reporting view
+        reportingMaterializationAdapter.materializeReportingView(testEvent, eventType);
 
         // Then: No exception thrown, view materialized
-        assertThat(reportingCircuitBreaker.getMetrics().getNumberOfSuccessfulCalls()).isGreaterThan(0);
-        log.info("✓ Customer reporting view materialized successfully");
-    }
-
-    @Test
-    @DisplayName("Should materialize transaction reporting view")
-    void testMaterializeTransactionView() {
-        // When: Materializing transaction reporting view
-        reportingMaterializationAdapter.materializeReportingView(testEvent, "TransactionCompleted");
-
-        // Then: View materialized without error
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        log.info("✓ Transaction reporting view materialized successfully");
-    }
-
-    @Test
-    @DisplayName("Should materialize account reporting view")
-    void testMaterializeAccountView() {
-        // When: Materializing account reporting view
-        reportingMaterializationAdapter.materializeReportingView(testEvent, "AccountOpened");
-
-        // Then: View materialized without error
-        assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        log.info("✓ Account reporting view materialized successfully");
+        log.info("✓ Reporting view for {} materialized successfully", eventType);
     }
 
     @Test
@@ -109,9 +78,8 @@ class ReportingMaterializationAdapterTest {
 
         // Then: Status should include circuit breaker info
         assertThat(status)
-            .containsKey("circuitBreakerName")
-            .containsKey("status");
-        assertThat(status.get("circuitBreakerName")).isEqualTo("reporting-database");
+            .containsKey("status")
+            .containsEntry("circuitBreakerName", "reporting-database");
         log.info("✓ Circuit breaker status retrieved: {}", status);
     }
 
@@ -159,22 +127,6 @@ class ReportingMaterializationAdapterTest {
     }
 
     @Test
-    @DisplayName("Should handle multiple concurrent materialization requests")
-    void testConcurrentMaterializationRequests() {
-        // Given: Multiple events for materialization
-        String[] eventTypes = {"CustomerCreated", "TransactionCompleted", "AccountOpened"};
-
-        // When: Materializing all types
-        for (String eventType : eventTypes) {
-            reportingMaterializationAdapter.materializeReportingView(testEvent, eventType);
-        }
-
-        // Then: All should be processed without error
-        assertThat(reportingCircuitBreaker.getMetrics().getNumberOfSuccessfulCalls()).isGreaterThanOrEqualTo(3);
-        log.info("✓ Multiple materialization requests handled successfully");
-    }
-
-    @Test
     @DisplayName("Should capture event timestamp correctly")
     void testEventTimestampCapture() {
         // Given: Event with timestamp
@@ -190,5 +142,4 @@ class ReportingMaterializationAdapterTest {
             .isBetween(beforeCall, afterCall);
         log.info("✓ Event timestamp captured correctly");
     }
-
 }

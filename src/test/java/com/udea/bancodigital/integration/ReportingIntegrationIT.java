@@ -32,7 +32,8 @@ class ReportingIntegrationIT {
             .withPassword("test");
 
     @Container
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"));
+    @SuppressWarnings("deprecation")
+    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")); // NOSONAR
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {

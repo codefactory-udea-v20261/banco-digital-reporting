@@ -1,7 +1,6 @@
 package com.udea.bancodigital.reporting.infrastructure.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Encoders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;

@@ -40,11 +40,11 @@ class ReportingDtoTest {
         assertEquals("ACTIVA", dto1.getEstado());
         assertEquals(new BigDecimal("1000.00"), dto1.getSaldoActual());
 
-        assertNotEquals(dto1, null);
-        assertNotEquals(dto1, new Object());
+        assertNotEquals(null, dto1);
+        assertNotEquals(new Object(), dto1);
         
-        assertNotEquals(dto1, CuentaReporteResponseDto.builder().cuentaId(UUID.randomUUID()).numeroCuenta("123456").tipoCuenta("AHORROS").estado("ACTIVA").saldoActual(new BigDecimal("1000.00")).build());
-        assertNotEquals(dto1, CuentaReporteResponseDto.builder().cuentaId(id).numeroCuenta("OTHER").tipoCuenta("AHORROS").estado("ACTIVA").saldoActual(new BigDecimal("1000.00")).build());
+        assertNotEquals(CuentaReporteResponseDto.builder().cuentaId(UUID.randomUUID()).numeroCuenta("123456").tipoCuenta("AHORROS").estado("ACTIVA").saldoActual(new BigDecimal("1000.00")).build(), dto1);
+        assertNotEquals(CuentaReporteResponseDto.builder().cuentaId(id).numeroCuenta("OTHER").tipoCuenta("AHORROS").estado("ACTIVA").saldoActual(new BigDecimal("1000.00")).build(), dto1);
     }
 
     @Test
