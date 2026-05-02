@@ -1,4 +1,4 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.config;
 
 import com.udea.bancodigital.reporting.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;

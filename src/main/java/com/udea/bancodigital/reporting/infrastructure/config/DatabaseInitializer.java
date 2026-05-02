@@ -1,4 +1,4 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,11 +1,11 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.security;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -39,25 +39,28 @@ class JwtAuthenticationFilterTest {
     @InjectMocks
     private JwtAuthenticationFilter filter;
 
-    private final String secret = "dev_secret_replace_in_prod_must_be_256bits";
+    private String secret;
+    private SecretKey key;
 
     @BeforeEach
     void setUp() {
+        // Generar una clave válida de 256 bits para HMAC-SHA
+        key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+        secret = Encoders.BASE64.encode(key.getEncoded());
+        
         ReflectionTestUtils.setField(filter, "jwtSecret", secret);
-        SecurityContextHolder.clearContext();
-    }
-
-    @AfterEach
-    void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
     @Test
     void doFilterInternal_DebeAutenticar_CuandoTokenEsValido() throws Exception {
-
-        UUID userId = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
-        String token = generateToken("testuser", userId, clienteId);
+        String token = Jwts.builder()
+                .subject("testuser")
+                .claim("roles", List.of("ROLE_CLIENTE"))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000))
+                .signWith(key)
+                .compact();
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
 
@@ -69,7 +72,6 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void doFilterInternal_NoDebeAutenticar_CuandoNoHayHeader() throws Exception {
-
         when(request.getHeader("Authorization")).thenReturn(null);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -80,24 +82,11 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void doFilterInternal_NoDebeAutenticar_CuandoTokenEsInvalido() throws Exception {
-
-        when(request.getHeader("Authorization")).thenReturn("Bearer invalid_token");
+        when(request.getHeader("Authorization")).thenReturn("Bearer token_invalido");
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);
-    }
-
-    private String generateToken(String subject, UUID userId, UUID clienteId) {
-        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        return Jwts.builder()
-                .subject(subject)
-                .claim("userId", userId.toString())
-                .claim("clienteId", clienteId.toString())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
-                .signWith(key)
-                .compact();
     }
 }
