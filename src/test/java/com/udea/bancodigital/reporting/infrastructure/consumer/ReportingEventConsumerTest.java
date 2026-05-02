@@ -3,6 +3,8 @@ package com.udea.bancodigital.reporting.infrastructure.consumer;
 import com.udea.bancodigital.reporting.infrastructure.adapter.out.ReportingMaterializationAdapter;
 import com.udea.bancodigital.shared.event.DomainEvent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,31 +27,14 @@ class ReportingEventConsumerTest {
     @InjectMocks
     private ReportingEventConsumer consumer;
 
-    @Test
-    void consumeEvent_ShouldProcessCustomerCreated() {
-        DomainEvent event = createEvent("CustomerCreated");
+    @ParameterizedTest
+    @ValueSource(strings = {"CustomerCreated", "TransactionCompleted", "AccountOpened"})
+    void consumeEvent_ShouldProcessKnownEventTypes(String eventType) {
+        DomainEvent event = createEvent(eventType);
         
         consumer.consumeEvent(event, "topic", 0, 1L);
         
-        verify(reportingMaterializationAdapter).materializeReportingView(any(Map.class), eq("CustomerCreated"));
-    }
-
-    @Test
-    void consumeEvent_ShouldProcessTransactionCompleted() {
-        DomainEvent event = createEvent("TransactionCompleted");
-        
-        consumer.consumeEvent(event, "topic", 0, 1L);
-        
-        verify(reportingMaterializationAdapter).materializeReportingView(any(Map.class), eq("TransactionCompleted"));
-    }
-
-    @Test
-    void consumeEvent_ShouldProcessAccountOpened() {
-        DomainEvent event = createEvent("AccountOpened");
-        
-        consumer.consumeEvent(event, "topic", 0, 1L);
-        
-        verify(reportingMaterializationAdapter).materializeReportingView(any(Map.class), eq("AccountOpened"));
+        verify(reportingMaterializationAdapter).materializeReportingView(any(Map.class), eq(eventType));
     }
 
     @Test

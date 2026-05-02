@@ -63,7 +63,7 @@ class ReportingDtoTest {
 
         assertEquals(dto, dto); // NOSONAR
         assertNotEquals(null, dto);
-        assertNotEquals("string", dto);
+        assertFalse(dto.equals("string")); // NOSONAR: Required for branch coverage (different types)
         
         // Test each field for inequality
         assertNotEquals(MovimientoReporteResponseDto.builder().movimientoId(UUID.randomUUID()).cuentaId(cuentaId).tipoMovimiento("DEBITO").monto(new BigDecimal("100.00")).fecha(now).descripcion("Test").build(), dto);
