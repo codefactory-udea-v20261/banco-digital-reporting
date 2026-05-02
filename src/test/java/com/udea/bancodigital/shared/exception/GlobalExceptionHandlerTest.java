@@ -1,6 +1,5 @@
 package com.udea.bancodigital.shared.exception;
 
-import com.udea.bancodigital.shared.web.ApiError;
 import com.udea.bancodigital.shared.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,5 +48,57 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals("Ocurrió un error inesperado. Contacte al administrador.",
                 response.getBody().getError().getMessage());
+    }
+    @Test
+    void handleClienteYaExisteException_DebeRetornarConflict() {
+        ClienteYaExisteException ex = new ClienteYaExisteException("email", "test@test.com");
+        ResponseEntity<ApiResponse<Void>> response = handler.handleClienteYaExisteException(ex, request);
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("Ya existe un cliente con email: test@test.com", response.getBody().getError().getMessage());
+    }
+
+    @Test
+    void handleCredencialesInvalidasException_DebeRetornarUnauthorized() {
+        CredencialesInvalidasException ex = new CredencialesInvalidasException();
+        ResponseEntity<ApiResponse<Void>> response = handler.handleCredencialesInvalidasException(ex, request);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    void handleCuentaBloqueadaException_DebeRetornarForbidden() {
+        CuentaBloqueadaException ex = new CuentaBloqueadaException();
+        ResponseEntity<ApiResponse<Void>> response = handler.handleCuentaBloqueadaException(ex, request);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    void handleDatosIncompletosException_DebeRetornarBadRequest() {
+        DatosIncompletosException ex = new DatosIncompletosException("Datos incompletos");
+        ResponseEntity<ApiResponse<Void>> response = handler.handleDatosIncompletosException(ex, request);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Datos incompletos", response.getBody().getError().getMessage());
+    }
+
+    @Test
+    void handleMfaRequeridoException_DebeRetornarAccepted() {
+        MfaRequeridoException ex = new MfaRequeridoException();
+        ResponseEntity<ApiResponse<Void>> response = handler.handleMfaRequeridoException(ex, request);
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+    }
+
+    @Test
+    void handleValidationException_DebeRetornarBadRequest() {
+        org.springframework.web.bind.MethodArgumentNotValidException ex = mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
+        org.springframework.validation.BindingResult br = mock(org.springframework.validation.BindingResult.class);
+        org.springframework.validation.FieldError fe = new org.springframework.validation.FieldError("obj", "field", "default message");
+        
+        when(ex.getBindingResult()).thenReturn(br);
+        when(br.getFieldErrors()).thenReturn(java.util.List.of(fe));
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleValidationException(ex, request);
+        
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Los datos enviados no son válidos", response.getBody().getError().getMessage());
+        assertEquals(1, response.getBody().getError().getDetails().size());
     }
 }

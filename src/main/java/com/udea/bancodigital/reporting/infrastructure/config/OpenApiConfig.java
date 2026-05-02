@@ -1,4 +1,4 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

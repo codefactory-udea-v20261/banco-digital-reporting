@@ -4,6 +4,13 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  core:
+    datasource:
+      jdbc-url: jdbc:h2:mem:coretestdb
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+
   jpa:
     hibernate:
       ddl-auto: create-drop

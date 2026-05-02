@@ -1,4 +1,4 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.config;
 
 import com.udea.bancodigital.reporting.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
@@ -40,7 +41,15 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(AbstractHttpConfigurer::disable)
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+            )
+            .headers(headers -> {
+                if (isDev) {
+                    headers.frameOptions(org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+                }
+            })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

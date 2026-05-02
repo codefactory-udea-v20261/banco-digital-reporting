@@ -1,4 +1,4 @@
-package com.udea.bancodigital.infrastructure.config;
+package com.udea.bancodigital.reporting.infrastructure.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +31,21 @@ public class DatabaseInitializer {
     }
 
     private void createDatabaseIfNotExists() {
+        if (dbUrl == null || !dbUrl.contains("/")) {
+            logger.warn("Invalid database URL format: {}", dbUrl);
+            return;
+        }
+
         // Extract database name from URL (assuming jdbc:postgresql://host:port/dbname)
         String dbName = dbUrl.substring(dbUrl.lastIndexOf("/") + 1);
         if (dbName.contains("?")) {
             dbName = dbName.substring(0, dbName.indexOf("?"));
+        }
+
+        // Security: Validate database name to prevent SQL Injection
+        if (!dbName.matches("^\\w+$")) {
+            logger.error("Security risk: Invalid database name detected in URL: {}", dbName);
+            return;
         }
 
         String baseUrl = dbUrl.substring(0, dbUrl.lastIndexOf("/") + 1) + "postgres";
@@ -45,7 +56,7 @@ public class DatabaseInitializer {
             ResultSet resultSet = conn.getMetaData().getCatalogs();
             boolean exists = false;
             while (resultSet.next()) {
-                if (resultSet.getString(1).equals(dbName)) {
+                if (resultSet.getString(1).equalsIgnoreCase(dbName)) {
                     exists = true;
                     break;
                 }
@@ -53,14 +64,16 @@ public class DatabaseInitializer {
 
             if (!exists) {
                 logger.info("Database {} does not exist. Creating...", dbName);
-                stmt.executeUpdate("CREATE DATABASE " + dbName);
-                logger.info("Database {} created successfully.", dbName);
+                // The name is validated against a whitelist regex above, so this is safe
+                @SuppressWarnings("java:S2077")
+                int result = stmt.executeUpdate("CREATE DATABASE " + dbName);
+                logger.info("Database {} created successfully. Result: {}", dbName, result);
             } else {
                 logger.info("Database {} already exists.", dbName);
             }
 
         } catch (Exception e) {
-            logger.warn("Could not check or create database {}. It might already exist or user has no permissions. Error: {}", dbName, e.getMessage());
+            logger.warn("Could not check or create database {}. Error: {}", dbName, e.getMessage());
         }
     }
 }
