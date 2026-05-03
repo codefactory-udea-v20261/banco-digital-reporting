@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import java.time.Instant;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Map;
  * 6. When BD_REPORT recovers: events automatically materialized
  */
 @Slf4j
+@Profile("!prod")
 @Component
 @RequiredArgsConstructor
 public class PendingReportingEventConsumer {

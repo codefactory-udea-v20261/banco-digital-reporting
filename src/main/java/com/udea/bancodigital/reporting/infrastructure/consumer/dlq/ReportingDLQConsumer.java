@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  * - Analytics on missing reports
  */
 @Slf4j
+@Profile("!prod")
 @Component
 @RequiredArgsConstructor
 public class ReportingDLQConsumer {
