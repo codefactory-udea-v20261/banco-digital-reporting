@@ -60,7 +60,8 @@ class JwtAuthenticationFilterTest {
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth);
-        assertEquals("user123", auth.getName());
+        com.udea.bancodigital.shared.security.AuthenticatedUser user = (com.udea.bancodigital.shared.security.AuthenticatedUser) auth.getPrincipal();
+        assertEquals("user123", user.username());
         assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
         verify(filterChain).doFilter(request, response);
     }

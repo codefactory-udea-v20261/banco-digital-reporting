@@ -35,7 +35,7 @@ class ReporteControllerTest {
     private AuthenticatedClientProvider authenticatedClientProvider;
 
     @Test
-    @WithMockUser(roles = "CLIENTE")
+    @WithMockUser(authorities = {"PERM_GENERATE_OWN_REPORTS", "PERM_READ_OWN_BALANCE"})
     void getSaldoTotal_ShouldReturnOk() throws Exception {
         UUID clienteId = UUID.randomUUID();
         SaldoTotalClienteResponseDto response = SaldoTotalClienteResponseDto.builder()
@@ -52,7 +52,7 @@ class ReporteControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "CLIENTE")
+    @WithMockUser(authorities = {"PERM_GENERATE_OWN_REPORTS", "PERM_READ_OWN_BALANCE"})
     void getResumenMovimientos_ShouldReturnNotImplemented() throws Exception {
         mockMvc.perform(get("/api/v1/reportes/resumen-movimientos")
                         .contentType(MediaType.APPLICATION_JSON))
