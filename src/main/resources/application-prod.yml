@@ -1,13 +1,33 @@
 spring:
-  zipkin:
-    enabled: false
-  kafka:
-    listener:
-      auto-startup: false
-  datasource:
-    url: jdbc:postgresql:///${DB_NAME:banco_digital_reporting}?cloudSqlInstance=${CLOUD_SQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=${DB_USERNAME:report_user}&password=${DB_PASSWORD:ReportingBD101!}
+  cloud:
+    vault:
+      enabled: false
+    config:
+      enabled: false
   jpa:
     show-sql: false
+
+# Disable Eureka for Cloud Run
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+# Disable Kafka consumers for Cloud Run
+spring.kafka:
+  bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  listener:
+    auto-startup: false
+
+spring.cloud.stream:
+  kafka:
+    binder:
+      auto-startup: false
+
+# Disable data migration in cloud
+migration:
+  enabled: false
 
 logging:
   level:
@@ -18,9 +38,3 @@ server:
   error:
     include-message: never
     include-stacktrace: never
-
-eureka:
-  client:
-    enabled: false
-    registerWithEureka: false
-    fetchRegistry: false
