@@ -34,6 +34,9 @@ jobs:
          command: monitor
          args: --org=carlosvaza --severity-threshold=high
 
+      - name: Dependency Check
+        run: mvn org.owasp:dependency-check-maven:check -Dtest=false -DfailIfNoData=false -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+
       - name: Validate required secrets
         env:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
