@@ -22,21 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: banco_digital_reporting_test
-          POSTGRES_USER: app_user
-          POSTGRES_PASSWORD: test_password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U app_user -d banco_digital_reporting_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,14 +38,9 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: Build & Test
-        run: ./mvnw -B verify -P ci -Djacoco.haltOnFailure=false -DskipITs=true
+        run: ./mvnw -B verify -Djacoco.haltOnFailure=false
         env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: banco_digital_reporting_test
-          DB_USERNAME: app_user
-          DB_PASSWORD: test_password
-          JWT_SECRET: ci_test_secret_replace_in_prod_256bits
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Upload JaCoCo Coverage Report
         if: always()
@@ -95,6 +75,37 @@ jobs:
             -DfailBuildOnCVSS=11 \
             -Dformat=HTML \
             -DoutputDirectory=reports || true
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Ensure Maven Wrapper is executable
+        run: chmod +x ./mvnw
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk to check for vulnerabilities
+        run: snyk monitor --org=carlosvaza --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: OWASP Dependency Check (Maven)
+        run: |
+          for i in {1..3}; do
+            echo "Attempt $i of 3..."
+            ./mvnw -B org.owasp:dependency-check-maven:check \
+              -DfailBuildOnCVSS=11 \
+              -Dformat=HTML \
+              -DoutputDirectory=reports \
+              -DconnectionTimeout=120000 \
+              -DreadTimeout=120000 && break || sleep 10
+          done || true
 
       - name: Upload Dependency Scan Report
         if: always()

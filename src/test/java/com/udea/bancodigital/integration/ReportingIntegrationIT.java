@@ -18,31 +18,27 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.junit.jupiter.api.Disabled;
 
-@SpringBootTest(
-    classes = com.udea.bancodigital.reporting.ReportingApplication.class,
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
+@SpringBootTest(classes = com.udea.bancodigital.reporting.ReportingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ActiveProfiles("it")
 @Disabled("Requires Docker, skipping in CI without Docker environment")
 class ReportingIntegrationIT {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
             .withDatabaseName("banco_digital_reporting_it")
             .withUsername("test")
             .withPassword("test");
-
-    @Container
-    @SuppressWarnings("deprecation")
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")); // NOSONAR
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        // Map secondary datasource to the same container
+        registry.add("core.datasource.jdbc-url", postgres::getJdbcUrl);
+        registry.add("core.datasource.username", postgres::getUsername);
+        registry.add("core.datasource.password", postgres::getPassword);
     }
 
     @Autowired
@@ -52,8 +48,7 @@ class ReportingIntegrationIT {
     void shouldReturnUnauthorizedWithoutToken() {
         var response = restTemplate.getForEntity(
                 "/api/v1/reportes/saldo-total",
-                String.class
-        );
+                String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -62,8 +57,7 @@ class ReportingIntegrationIT {
     void shouldReturnUnauthorizedForResumenMovimientos() {
         var response = restTemplate.getForEntity(
                 "/api/v1/reportes/resumen-movimientos",
-                String.class
-        );
+                String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }

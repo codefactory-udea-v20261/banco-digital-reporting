@@ -1,36 +1,55 @@
 spring:
-  cloud:
-    vault:
-      enabled: false
-    discovery:
-      enabled: false
-eureka:
-  client:
-    enabled: false
   datasource:
-    url: jdbc:tc:postgresql:16-alpine:///banco_digital_reporting_it?TC_DAEMON=true
+    url: jdbc:postgresql://localhost:5432/test
     username: test
     password: test
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-  kafka:
-    bootstrap-servers: ${spring.kafka.bootstrap-servers:localhost:9092}
-  flyway:
-    enabled: false
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+  kafka:
+    listener:
+      auto-startup: false
+    consumer:
+      group-id: reporting-service-test
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: com.udea.bancodigital
+        spring.json.use.type.headers: false
+  cloud:
+    discovery:
+      enabled: false
+    vault:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+jwt:
+  secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
 
 app:
   security:
     jwt:
       secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
 
-management:
-  health:
-    vault:
-      enabled: false
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
 
 logging:
   level:
     com.udea.bancodigital: DEBUG
+
+core:
+  datasource:
+    jdbc-url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: org.postgresql.Driver

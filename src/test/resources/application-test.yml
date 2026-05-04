@@ -1,26 +1,14 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  core:
-    datasource:
-      jdbc-url: jdbc:h2:mem:coretestdb
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
-
   jpa:
     hibernate:
       ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
     open-in-view: false
   flyway:
     enabled: false
   kafka:
-    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
     consumer:
       group-id: reporting-service-test
       auto-offset-reset: earliest
@@ -34,8 +22,24 @@ spring:
     vault:
       enabled: false
 
+eureka:
+  client:
+    enabled: false
+
 jwt:
   secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
+
+app:
+  security:
+    jwt:
+      secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
+
+core:
+  datasource:
+    jdbc-url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: org.postgresql.Driver
 
 server:
   error:
