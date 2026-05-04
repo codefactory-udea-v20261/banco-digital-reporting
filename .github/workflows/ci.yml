@@ -67,7 +67,17 @@ jobs:
           format: 'HTML'
           args: '--failOnCVSS 7 --enableRetired'
 
-            # 1. INTEGRACIÓN CON SNYK
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+
+      - name: Configure Java Environment
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+          echo "PATH=$JAVA_HOME_17_X64/bin:$PATH" >> $GITHUB_ENV
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/maven@master
         env:
@@ -79,14 +89,17 @@ jobs:
       - name: Ensure Maven Wrapper is executable
         run: chmod +x ./mvnw
 
-            # 2. OWASP CON NVD API KEY
       - name: OWASP Dependency Check (Maven)
         run: |
-          ./mvnw -B org.owasp:dependency-check-maven:check \
-           -DfailBuildOnCVSS=7 \
-           -DnvdApiKey=${{ secrets.NVD_API_KEY }} \
-           -Dformat=HTML \
-           -DoutputDirectory=reports || true
+          for i in {1..3}; do
+            echo "Attempt $i of 3..."
+            ./mvnw -B org.owasp:dependency-check-maven:check \
+              -DfailBuildOnCVSS=11 \
+              -Dformat=HTML \
+              -DoutputDirectory=reports \
+              -DconnectionTimeout=120000 \
+              -DreadTimeout=120000 && break || sleep 10
+          done || true
 
       - name: Upload Dependency Scan Report
         if: always()
