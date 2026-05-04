@@ -7,15 +7,14 @@ spring:
 eureka:
   client:
     enabled: false
-  datasource:
-    url: jdbc:tc:postgresql:16-alpine:///banco_digital_reporting_it?TC_DAEMON=true
-    username: test
-    password: test
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-  kafka:
-    bootstrap-servers: ${spring.kafka.bootstrap-servers:localhost:9092}
   flyway:
     enabled: false
+core:
+  datasource:
+    jdbc-url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop
