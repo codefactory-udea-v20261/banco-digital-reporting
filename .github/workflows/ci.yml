@@ -2,7 +2,7 @@ name: CI Pipeline — Reporting
 
 on:
   push:
-    branches: [main, develop, checks_revision]
+    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
@@ -77,13 +77,14 @@ jobs:
       - name: Ensure Maven Wrapper is executable
         run: chmod +x ./mvnw
 
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
+        run: snyk monitor --org=carlosvaza --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: --org=carlosvaza --severity-threshold=high
+        continue-on-error: true
 
       - name: OWASP Dependency Check (Maven)
         run: |

@@ -3,7 +3,6 @@ package com.udea.bancodigital.shared.web;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.time.Instant;
 
@@ -11,7 +10,8 @@ import java.time.Instant;
  * Envoltorio estándar para TODAS las respuestas de la API.
  * <p>
  * Estructura uniforme de respuesta para la API.
- * Uso: ApiResponse.ok(payload), ApiResponse.created(payload), ApiResponse.error(...)
+ * Uso: ApiResponse.ok(payload), ApiResponse.created(payload),
+ * ApiResponse.error(...)
  */
 @Getter
 @Builder
