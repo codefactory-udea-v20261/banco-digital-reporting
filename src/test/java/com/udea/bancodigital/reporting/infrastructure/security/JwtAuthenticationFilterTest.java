@@ -1,7 +1,8 @@
 package com.udea.bancodigital.reporting.infrastructure.security;
 
+import com.udea.bancodigital.shared.security.AuthenticatedUser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,14 +36,14 @@ class JwtAuthenticationFilterTest {
     @InjectMocks
     private JwtAuthenticationFilter filter;
 
-    private String secret;
+    // Use a fixed secret string long enough for HS256 (32+ bytes)
+    private static final String SECRET = "cb02f71c3a9cb8b9f36c06f88582553925e03f30b867ae89450c7254737026d8";
     private SecretKey key;
 
     @BeforeEach
     void setUp() {
-        key = Jwts.SIG.HS256.key().build();
-        secret = Encoders.BASE64.encode(key.getEncoded());
-        ReflectionTestUtils.setField(filter, "jwtSecret", secret);
+        key = Keys.hmacShaKeyFor(SECRET.getBytes());
+        ReflectionTestUtils.setField(filter, "jwtSecret", SECRET);
         SecurityContextHolder.clearContext();
     }
 
@@ -60,8 +61,30 @@ class JwtAuthenticationFilterTest {
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth);
-        assertEquals("user123", auth.getName());
+        AuthenticatedUser user = (AuthenticatedUser) auth.getPrincipal();
+        assertEquals("user123", user.username());
         assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_WithAllClaims() throws Exception {
+        String token = Jwts.builder()
+                .subject("user123")
+                .claim("roles", List.of("ADMIN"))
+                .claim("permissions", List.of("READ_ALL"))
+                .claim("clienteId", "123e4567-e89b-12d3-a456-426614174000")
+                .claim("uid", "123e4567-e89b-12d3-a456-426614174001")
+                .signWith(key)
+                .compact();
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
+        assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("READ_ALL")));
         verify(filterChain).doFilter(request, response);
     }
 
@@ -78,6 +101,7 @@ class JwtAuthenticationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
         assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
     }
 
@@ -93,6 +117,7 @@ class JwtAuthenticationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
         assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE")));
     }
 

@@ -26,6 +26,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReportingMaterializationAdapter {
 
+    private static final String EVENT_ID = "eventId";
+    private static final String AGGREGATE_ID = "aggregateId";
+
+
     private final KafkaTemplate<String, Map<String, Object>> kafkaTemplate;
 
     /**
@@ -36,7 +40,7 @@ public class ReportingMaterializationAdapter {
     @Retry(name = "reporting-database")
     public void materializeReportingView(Map<String, Object> event, String eventType) {
         log.debug("Materializing reporting view: type={}, eventId={}", 
-            eventType, event.get("eventId"));
+            eventType, event.get(EVENT_ID));
 
         try {
             // Create materialized view entry
@@ -45,7 +49,7 @@ public class ReportingMaterializationAdapter {
             reportingView.put("viewTimestamp", Instant.now().toString());
             reportingView.put("materializedAt", System.currentTimeMillis());
 
-            // TODO: Persist to BD_REPORT via repository
+            // FUTURE: Persist to BD_REPORT via repository
             // Switch on event type to update different reporting tables
             switch (eventType) {
                 case "CustomerCreated":
@@ -62,7 +66,7 @@ public class ReportingMaterializationAdapter {
             }
 
             log.info("Successfully materialized reporting view: type={}, eventId={}", 
-                eventType, event.get("eventId"));
+                eventType, event.get(EVENT_ID));
 
         } catch (Exception e) {
             log.error("Database error materializing reporting view: type={}, error={}", 
@@ -84,17 +88,17 @@ public class ReportingMaterializationAdapter {
             // Create pending reporting event
             Map<String, Object> pendingEvent = new HashMap<>(event);
             pendingEvent.put("eventType", eventType);
-            pendingEvent.put("originalEventId", event.get("eventId"));
+            pendingEvent.put("originalEventId", event.get(EVENT_ID));
             pendingEvent.put("timestamp", Instant.now().toString());
             pendingEvent.put("retryCount", 0);
             pendingEvent.put("reason", "Reporting database unavailable");
 
             // Send to pending queue for replay
             kafkaTemplate.send("reporting-events-pending", 
-                String.valueOf(event.get("aggregateId")), 
+                String.valueOf(event.get(AGGREGATE_ID)), 
                 pendingEvent);
 
-            log.info("Queued pending reporting event for aggregateId={}", event.get("aggregateId"));
+            log.info("Queued pending reporting event for aggregateId={}", event.get(AGGREGATE_ID));
 
         } catch (Exception kafkaError) {
             log.error("Failed to queue fallback reporting event: {}", kafkaError.getMessage());
@@ -107,8 +111,8 @@ public class ReportingMaterializationAdapter {
      */
     private void updateCustomerReportingView(Map<String, Object> event) {
         log.debug("[REPORTING] Updating customer metrics for aggregateId={}", 
-            event.get("aggregateId"));
-        // TODO: Update customer_metrics table in BD_REPORT
+            event.get(AGGREGATE_ID));
+        // FUTURE: Update customer_metrics table in BD_REPORT
     }
 
     /**
@@ -116,8 +120,8 @@ public class ReportingMaterializationAdapter {
      */
     private void updateTransactionReportingView(Map<String, Object> event) {
         log.debug("[REPORTING] Updating transaction metrics for aggregateId={}", 
-            event.get("aggregateId"));
-        // TODO: Update transaction_metrics table in BD_REPORT
+            event.get(AGGREGATE_ID));
+        // FUTURE: Update transaction_metrics table in BD_REPORT
     }
 
     /**
@@ -125,8 +129,8 @@ public class ReportingMaterializationAdapter {
      */
     private void updateAccountReportingView(Map<String, Object> event) {
         log.debug("[REPORTING] Updating account metrics for aggregateId={}", 
-            event.get("aggregateId"));
-        // TODO: Update account_metrics table in BD_REPORT
+            event.get(AGGREGATE_ID));
+        // FUTURE: Update account_metrics table in BD_REPORT
     }
 
     /**

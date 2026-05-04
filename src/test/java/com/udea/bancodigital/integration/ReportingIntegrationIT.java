@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Disabled;
 @SpringBootTest(classes = com.udea.bancodigital.reporting.ReportingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ActiveProfiles("it")
+@Disabled("Requires Docker, skipping in CI without Docker environment")
 class ReportingIntegrationIT {
 
     @Container

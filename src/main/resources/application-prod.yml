@@ -1,13 +1,54 @@
 spring:
-  zipkin:
-    enabled: false
-  kafka:
-    listener:
-      auto-startup: false
-  datasource:
-    url: jdbc:postgresql:///${DB_NAME:banco_digital_reporting}?cloudSqlInstance=${CLOUD_SQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=${DB_USERNAME:report_user}&password=${DB_PASSWORD:ReportingBD101!}
+  cloud:
+    vault:
+      enabled: false
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+    loadbalancer:
+      enabled: false
   jpa:
     show-sql: false
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+
+# Disable Eureka for Cloud Run
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+# Disable Kafka consumers for Cloud Run
+spring.kafka:
+  bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  listener:
+    auto-startup: false
+
+spring.cloud.stream:
+  kafka:
+    binder:
+      auto-startup: false
+
+# Disable tracing in Cloud Run
+management:
+  tracing:
+    enabled: false
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
+    diskspace:
+      enabled: false
+    mail:
+      enabled: false
 
 logging:
   level:
@@ -15,12 +56,7 @@ logging:
     com.udea.bancodigital: INFO
 
 server:
+  port: ${PORT:8080}
   error:
     include-message: never
     include-stacktrace: never
-
-eureka:
-  client:
-    enabled: false
-    registerWithEureka: false
-    fetchRegistry: false

@@ -76,21 +76,11 @@ public class GenerarReporteActividadUseCase implements GenerarReporteActividadPo
 
         for (MovimientoReporte mov : movimientos) {
             switch (mov.tipo()) {
-                case "DEPOSITO":
-                    depositos = depositos.add(mov.monto());
-                    break;
-                case "RETIRO":
-                    retiros = retiros.add(mov.monto());
-                    break;
-                case "TRANSFERENCIA_DEBITO":
-                case "TRANSFERENCIA_CREDITO":
-                    transferencias = transferencias.add(mov.monto());
-                    break;
-                case "PAGO":
-                case "PAGO_SERVICIO":
-                case "PAGO_NOMINA":
-                    pagos = pagos.add(mov.monto());
-                    break;
+                case "DEPOSITO" -> depositos = depositos.add(mov.monto());
+                case "RETIRO" -> retiros = retiros.add(mov.monto());
+                case "TRANSFERENCIA_DEBITO", "TRANSFERENCIA_CREDITO" -> transferencias = transferencias.add(mov.monto());
+                case "PAGO", "PAGO_SERVICIO", "PAGO_NOMINA" -> pagos = pagos.add(mov.monto());
+                default -> { /* tipo de movimiento no contabilizado */ }
             }
         }
 
