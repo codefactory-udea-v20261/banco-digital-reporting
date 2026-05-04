@@ -18,8 +18,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Integration tests for Reporting Materialization Adapter with Circuit Breaker.
  */
@@ -47,7 +45,7 @@ class ReportingMaterializationAdapterTest {
             reportingCircuitBreaker = circuitBreakerRegistry.circuitBreaker("reporting-database");
             reportingCircuitBreaker.reset(); // Reset to CLOSED state
         } catch (Exception e) {
-            System.err.println("Circuit breaker not available in test context");
+            log.warn("Circuit breaker not available in test context");
         }
 
         testEvent = new HashMap<>();
@@ -69,7 +67,7 @@ class ReportingMaterializationAdapterTest {
 
         // Then: No exception thrown, view materialized
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        System.out.printf("✓ Reporting view for %s materialized successfully%n", eventType);
+        log.info("✓ Reporting view for {} materialized successfully", eventType);
     }
 
     @Test
@@ -82,7 +80,7 @@ class ReportingMaterializationAdapterTest {
         assertThat(status)
             .containsKey("status")
             .containsEntry("circuitBreakerName", "reporting-database");
-        System.out.printf("✓ Circuit breaker status retrieved: %s%n", status);
+        log.info("✓ Circuit breaker status retrieved: {}", status);
     }
 
     @Test
@@ -93,7 +91,7 @@ class ReportingMaterializationAdapterTest {
 
         // Then: Should log warning and not crash
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        System.out.println("✓ Unknown event type handled gracefully");
+        log.info("✓ Unknown event type handled gracefully");
     }
 
     @Test
@@ -101,7 +99,7 @@ class ReportingMaterializationAdapterTest {
     void testCircuitBreakerStateTransitions() {
         // Given: Circuit breaker in CLOSED state
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        System.out.println("State 1: CLOSED (initial)");
+        log.info("State 1: CLOSED (initial)");
 
         // When: CB is healthy (simulated success calls)
         for (int i = 0; i < 5; i++) {
@@ -110,7 +108,7 @@ class ReportingMaterializationAdapterTest {
 
         // Then: CB should remain CLOSED
         assertThat(reportingCircuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        System.out.println("✓ Circuit breaker state transitions verified");
+        log.info("✓ Circuit breaker state transitions verified");
     }
 
     @Test
@@ -125,7 +123,7 @@ class ReportingMaterializationAdapterTest {
 
         // Then: Metadata should be included in view
         assertThat(testEvent).containsKeys("amount", "currency");
-        System.out.println("✓ Event metadata included in reporting view");
+        log.info("✓ Event metadata included in reporting view");
     }
 
     @Test
@@ -142,6 +140,6 @@ class ReportingMaterializationAdapterTest {
         // Then: Timestamp should be preserved
         assertThat((Long) testEvent.get("eventTimestamp"))
             .isBetween(beforeCall, afterCall);
-        System.out.println("✓ Event timestamp captured correctly");
+        log.info("✓ Event timestamp captured correctly");
     }
 }
