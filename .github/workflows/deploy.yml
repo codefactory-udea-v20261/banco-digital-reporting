@@ -26,6 +26,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        env:
+         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+         command: monitor
+         args: --org=carlosvaza --severity-threshold=high
+
       - name: Validate required secrets
         env:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}

@@ -42,9 +42,8 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        secret = "my-32-character-ultra-secure-and-ultra-long-secret";
-        key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes());
-        ReflectionTestUtils.setField(filter, "jwtSecret", secret);
+        key = Keys.hmacShaKeyFor(SECRET.getBytes());
+        ReflectionTestUtils.setField(filter, "jwtSecret", SECRET);
         SecurityContextHolder.clearContext();
     }
 
