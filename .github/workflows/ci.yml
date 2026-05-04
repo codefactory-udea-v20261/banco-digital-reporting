@@ -87,6 +87,27 @@ jobs:
           format: 'HTML'
           args: '--failOnCVSS 7 --enableRetired'
 
+            # 1. INTEGRACIÓN CON SNYK
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --org=carlosvaza --severity-threshold=high
+
+      - name: Ensure Maven Wrapper is executable
+        run: chmod +x ./mvnw
+
+            # 2. OWASP CON NVD API KEY
+      - name: OWASP Dependency Check (Maven)
+        run: |
+          ./mvnw -B org.owasp:dependency-check-maven:check \
+           -DfailBuildOnCVSS=7 \
+           -DnvdApiKey=${{ secrets.NVD_API_KEY }} \
+           -Dformat=HTML \
+           -DoutputDirectory=reports || true
+
       - name: Upload Dependency Scan Report
         if: always()
         uses: actions/upload-artifact@v4

@@ -56,7 +56,7 @@ class ReportingMaterializationAdapterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CustomerCreated", "TransactionCompleted", "AccountOpened"})
+    @ValueSource(strings = { "CustomerCreated", "TransactionCompleted", "AccountOpened" })
     @DisplayName("Should materialize reporting view for known event types")
     void testMaterializeViewSuccess(String eventType) {
         // Given: Database is healthy, circuit breaker is CLOSED
@@ -78,8 +78,8 @@ class ReportingMaterializationAdapterTest {
 
         // Then: Status should include circuit breaker info
         assertThat(status)
-            .containsKey("status")
-            .containsEntry("circuitBreakerName", "reporting-database");
+                .containsKey("status")
+                .containsEntry("circuitBreakerName", "reporting-database");
         log.info("✓ Circuit breaker status retrieved: {}", status);
     }
 
@@ -139,7 +139,7 @@ class ReportingMaterializationAdapterTest {
 
         // Then: Timestamp should be preserved
         assertThat((Long) testEvent.get("eventTimestamp"))
-            .isBetween(beforeCall, afterCall);
+                .isBetween(beforeCall, afterCall);
         log.info("✓ Event timestamp captured correctly");
     }
 }

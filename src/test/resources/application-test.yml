@@ -21,6 +21,8 @@ spring:
     enabled: false
   kafka:
     bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
     consumer:
       group-id: reporting-service-test
       auto-offset-reset: earliest
@@ -34,8 +36,17 @@ spring:
     vault:
       enabled: false
 
+eureka:
+  client:
+    enabled: false
+
 jwt:
   secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
+
+app:
+  security:
+    jwt:
+      secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
 
 server:
   error:
