@@ -19,9 +19,26 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.junit.jupiter.api.Disabled;
 
 @SpringBootTest(classes = com.udea.bancodigital.reporting.ReportingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@org.springframework.context.annotation.Import(com.udea.bancodigital.reporting.config.TestContainersConfig.class)
+@Testcontainers
 @ActiveProfiles("it")
 class ReportingIntegrationIT {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
+            .withDatabaseName("banco_digital_reporting_it")
+            .withUsername("test")
+            .withPassword("test");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        // Map secondary datasource to the same container
+        registry.add("core.datasource.jdbc-url", postgres::getJdbcUrl);
+        registry.add("core.datasource.username", postgres::getUsername);
+        registry.add("core.datasource.password", postgres::getPassword);
+    }
 
     @Autowired
     private TestRestTemplate restTemplate;
