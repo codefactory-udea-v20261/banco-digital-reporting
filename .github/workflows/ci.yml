@@ -2,7 +2,7 @@ name: CI Pipeline — Reporting
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, checks_revision]
   pull_request:
     branches: [main, develop]
 
