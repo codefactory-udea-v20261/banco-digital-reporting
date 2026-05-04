@@ -22,21 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: banco_digital_reporting_test
-          POSTGRES_USER: app_user
-          POSTGRES_PASSWORD: test_password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U app_user -d banco_digital_reporting_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,14 +38,9 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: Build & Test
-        run: ./mvnw -B verify -P ci
+        run: ./mvnw -B verify -Djacoco.haltOnFailure=false
         env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: banco_digital_reporting_test
-          DB_USERNAME: app_user
-          DB_PASSWORD: test_password
-          JWT_SECRET: ci_test_secret_replace_in_prod_256bits
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Upload JaCoCo Coverage Report
         if: always()

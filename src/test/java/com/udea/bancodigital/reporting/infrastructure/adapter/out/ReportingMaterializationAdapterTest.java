@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Slf4j
 @SpringBootTest
+@org.springframework.context.annotation.Import(com.udea.bancodigital.reporting.config.TestContainersConfig.class)
 @ActiveProfiles("test")
 @DisplayName("Reporting Materialization Adapter - Circuit Breaker Tests")
 class ReportingMaterializationAdapterTest {

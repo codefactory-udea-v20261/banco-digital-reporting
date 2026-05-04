@@ -19,28 +19,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.junit.jupiter.api.Disabled;
 
 @SpringBootTest(classes = com.udea.bancodigital.reporting.ReportingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
+@org.springframework.context.annotation.Import(com.udea.bancodigital.reporting.config.TestContainersConfig.class)
 @ActiveProfiles("it")
-@Disabled("Requires Docker, skipping in CI without Docker environment")
 class ReportingIntegrationIT {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-            .withDatabaseName("banco_digital_reporting_it")
-            .withUsername("test")
-            .withPassword("test");
-
-    @Container
-    @SuppressWarnings("deprecation")
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")); // NOSONAR
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-    }
 
     @Autowired
     private TestRestTemplate restTemplate;
