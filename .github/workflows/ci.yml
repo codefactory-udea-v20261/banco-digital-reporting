@@ -72,11 +72,10 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
+          cache: maven
 
-      - name: Configure Java Environment
-        run: |
-          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
-          echo "PATH=$JAVA_HOME_17_X64/bin:$PATH" >> $GITHUB_ENV
+      - name: Ensure Maven Wrapper is executable
+        run: chmod +x ./mvnw
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/maven@master
@@ -85,9 +84,6 @@ jobs:
         with:
           command: monitor
           args: --org=carlosvaza --severity-threshold=high
-
-      - name: Ensure Maven Wrapper is executable
-        run: chmod +x ./mvnw
 
       - name: OWASP Dependency Check (Maven)
         run: |
