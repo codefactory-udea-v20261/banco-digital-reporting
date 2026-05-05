@@ -14,10 +14,7 @@ class DatabaseConfigTest {
     void testBeans() {
         DataSource ds = mock(DataSource.class);
         assertNotNull(config.reportingDataSourceProperties());
-        assertNotNull(config.coreDataSource());
         assertNotNull(config.reportingJdbcTemplate(ds));
-        assertNotNull(config.coreJdbcTemplate(ds));
         assertNotNull(config.reportingNamedParameterJdbcTemplate(ds));
-        assertNotNull(config.coreNamedParameterJdbcTemplate(ds));
     }
 }
