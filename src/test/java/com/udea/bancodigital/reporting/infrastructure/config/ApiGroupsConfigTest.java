@@ -11,16 +11,11 @@ class ApiGroupsConfigTest {
 
     @Test
     void testGroups() {
-        GroupedOpenApi auth = config.authApi();
-        assertNotNull(auth);
-        
-        // Execute the customizer lambda
         io.swagger.v3.oas.models.OpenAPI openAPI = new io.swagger.v3.oas.models.OpenAPI();
-        auth.getOpenApiCustomizers().forEach(c -> c.customise(openAPI));
+        GroupedOpenApi reporting = config.reportingApi();
+        assertNotNull(reporting);
+
+        reporting.getOpenApiCustomizers().forEach(c -> c.customise(openAPI));
         assertNotNull(openAPI.getInfo());
-        
-        assertNotNull(config.customersApi());
-        assertNotNull(config.accountsApi());
-        assertNotNull(config.reportingApi());
     }
 }
