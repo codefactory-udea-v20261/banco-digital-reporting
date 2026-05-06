@@ -4,6 +4,7 @@ import com.udea.bancodigital.reporting.domain.model.ReporteActividad;
 import com.udea.bancodigital.reporting.domain.model.TotalMovimientos;
 import com.udea.bancodigital.reporting.domain.port.in.GenerarReporteActividadPort;
 import com.udea.bancodigital.reporting.infrastructure.adapter.out.AuthServiceAdapter;
+import com.udea.bancodigital.reporting.infrastructure.security.IdentityServiceClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,6 +37,9 @@ class ReporteActividadControllerTest {
 
     @MockBean
     private AuthServiceAdapter authServiceAdapter;
+
+    @MockBean
+    private IdentityServiceClient identityServiceClient;
 
     @Test
     void generarReporteActividad_DebeRetornar200() throws Exception {

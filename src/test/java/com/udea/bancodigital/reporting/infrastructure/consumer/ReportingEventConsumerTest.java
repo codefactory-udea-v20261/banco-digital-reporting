@@ -18,14 +18,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.junit.jupiter.api.BeforeEach;
+
 @ExtendWith(MockitoExtension.class)
 class ReportingEventConsumerTest {
 
     @Mock
     private ReportingMaterializationAdapter reportingMaterializationAdapter;
 
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
     @InjectMocks
     private ReportingEventConsumer consumer;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(0);
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"CustomerCreated", "TransactionCompleted", "AccountOpened"})

@@ -4,6 +4,7 @@ import com.udea.bancodigital.reporting.domain.port.in.ConsultarSaldoTotalCliente
 import com.udea.bancodigital.shared.security.AuthenticatedClientProvider;
 import com.udea.bancodigital.reporting.application.dto.SaldoTotalClienteResponseDto;
 import com.udea.bancodigital.reporting.infrastructure.config.SecurityConfig;
+import com.udea.bancodigital.reporting.infrastructure.security.IdentityServiceClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,6 +34,9 @@ class ReporteControllerTest {
 
     @MockBean
     private AuthenticatedClientProvider authenticatedClientProvider;
+
+    @MockBean
+    private IdentityServiceClient identityServiceClient;
 
     @Test
     @WithMockUser(authorities = {"PERM_GENERATE_OWN_REPORTS", "PERM_READ_OWN_BALANCE"})

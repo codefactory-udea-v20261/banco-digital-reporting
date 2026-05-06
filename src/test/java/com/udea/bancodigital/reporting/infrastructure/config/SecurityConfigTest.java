@@ -28,11 +28,6 @@ class SecurityConfigTest {
     private SecurityConfig securityConfig;
 
     @Test
-    void testPasswordEncoder() {
-        assertNotNull(securityConfig.passwordEncoder());
-    }
-
-    @Test
     void testFilterChainDev() throws Exception {
         when(environment.getActiveProfiles()).thenReturn(new String[]{"dev"});
         try {

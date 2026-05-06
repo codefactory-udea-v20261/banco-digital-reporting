@@ -50,43 +50,6 @@ class GlobalExceptionHandlerTest {
                 response.getBody().getError().getMessage());
     }
     @Test
-    void handleClienteYaExisteException_DebeRetornarConflict() {
-        ClienteYaExisteException ex = new ClienteYaExisteException("email", "test@test.com");
-        ResponseEntity<ApiResponse<Void>> response = handler.handleClienteYaExisteException(ex, request);
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Ya existe un cliente con email: test@test.com", response.getBody().getError().getMessage());
-    }
-
-    @Test
-    void handleCredencialesInvalidasException_DebeRetornarUnauthorized() {
-        CredencialesInvalidasException ex = new CredencialesInvalidasException();
-        ResponseEntity<ApiResponse<Void>> response = handler.handleCredencialesInvalidasException(ex, request);
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-    }
-
-    @Test
-    void handleCuentaBloqueadaException_DebeRetornarForbidden() {
-        CuentaBloqueadaException ex = new CuentaBloqueadaException();
-        ResponseEntity<ApiResponse<Void>> response = handler.handleCuentaBloqueadaException(ex, request);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    }
-
-    @Test
-    void handleDatosIncompletosException_DebeRetornarBadRequest() {
-        DatosIncompletosException ex = new DatosIncompletosException("Datos incompletos");
-        ResponseEntity<ApiResponse<Void>> response = handler.handleDatosIncompletosException(ex, request);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Datos incompletos", response.getBody().getError().getMessage());
-    }
-
-    @Test
-    void handleMfaRequeridoException_DebeRetornarAccepted() {
-        MfaRequeridoException ex = new MfaRequeridoException();
-        ResponseEntity<ApiResponse<Void>> response = handler.handleMfaRequeridoException(ex, request);
-        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-    }
-
-    @Test
     void handleValidationException_DebeRetornarBadRequest() {
         org.springframework.web.bind.MethodArgumentNotValidException ex = mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
         org.springframework.validation.BindingResult br = mock(org.springframework.validation.BindingResult.class);
@@ -100,5 +63,16 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Los datos enviados no son válidos", response.getBody().getError().getMessage());
         assertEquals(1, response.getBody().getError().getDetails().size());
+    }
+
+    @Test
+    void handleReportingBusinessException_DebeUsarHandlerGenericoDeNegocio() {
+        BusinessException ex = new BusinessException("RPT-001", "Rango inválido", HttpStatus.BAD_REQUEST) {
+        };
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBusinessException(ex, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Rango inválido", response.getBody().getError().getMessage());
     }
 }

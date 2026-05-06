@@ -4,12 +4,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  core:
-    datasource:
-      jdbc-url: jdbc:h2:mem:coretestdb
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
 
   jpa:
     hibernate:
@@ -33,6 +27,13 @@ spring:
       enabled: false
     vault:
       enabled: false
+
+core:
+  datasource:
+    jdbc-url: jdbc:h2:mem:coretestdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
 jwt:
   secret: dGVzdF9zZWNyZXRfcmVwbGFjZV9pbl9wcm9kX3dpdGhfMjU2Yml0cw==
