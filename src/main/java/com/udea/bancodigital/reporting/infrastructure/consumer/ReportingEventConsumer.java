@@ -142,6 +142,12 @@ public class ReportingEventConsumer {
      */
     private Map<String, Object> eventToMap(DomainEvent event) {
         Map<String, Object> eventMap = new HashMap<>();
+        // Subclass-specific fields (customer_id, email, amount, ...) come first
+        // so the envelope keys below can never be silently overwritten by a
+        // misconfigured event payload that reuses an envelope name.
+        if (event.getPayload() != null) {
+            eventMap.putAll(event.getPayload());
+        }
         eventMap.put("eventId", event.getEventId());
         eventMap.put("aggregateId", event.getAggregateId());
         eventMap.put("eventType", event.getEventType());
