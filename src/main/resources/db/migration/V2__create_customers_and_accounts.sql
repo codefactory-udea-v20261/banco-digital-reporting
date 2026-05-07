@@ -1,19 +1,21 @@
 -- ════════════════════════════════════════════════════════════
--- V2: Tablas cliente y cuenta (DDL inicial)
--- Módulos: customers, accounts
+-- V2: Read-model tables for customers and accounts.
+-- Constraints are intentionally relaxed compared to Core's schema:
+-- this is an eventually-consistent read model, so foreign keys and
+-- unique constraints that fight reordered or partial events are dropped.
 -- ════════════════════════════════════════════════════════════
 
 -- ── Tabla: cliente ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS cliente (
     id              UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-    numero_cedula   VARCHAR(20)     NOT NULL UNIQUE,
-    primer_nombre   VARCHAR(100)    NOT NULL,
+    numero_cedula   VARCHAR(20),
+    primer_nombre   VARCHAR(100),
     segundo_nombre  VARCHAR(100),
-    primer_apellido VARCHAR(100)    NOT NULL,
+    primer_apellido VARCHAR(100),
     segundo_apellido VARCHAR(100),
-    email           VARCHAR(255)    NOT NULL UNIQUE,
+    email           VARCHAR(255),
     telefono        VARCHAR(20),
-    fecha_nacimiento DATE           NOT NULL,
+    fecha_nacimiento DATE,
     activo          BOOLEAN         NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
@@ -21,12 +23,9 @@ CREATE TABLE IF NOT EXISTS cliente (
     updated_by      VARCHAR(100)    NOT NULL DEFAULT 'SYSTEM'
 );
 
-COMMENT ON TABLE cliente IS 'Registro de clientes del banco digital';
-COMMENT ON COLUMN cliente.numero_cedula IS 'Campo inmutable — no puede actualizarse vía API';
-
-CREATE INDEX IF NOT EXISTS idx_cliente_email       ON cliente (email);
-CREATE INDEX IF NOT EXISTS idx_cliente_cedula      ON cliente (numero_cedula);
-CREATE INDEX IF NOT EXISTS idx_cliente_activo      ON cliente (activo) WHERE activo = TRUE;
+CREATE INDEX IF NOT EXISTS idx_cliente_email   ON cliente (email);
+CREATE INDEX IF NOT EXISTS idx_cliente_cedula  ON cliente (numero_cedula);
+CREATE INDEX IF NOT EXISTS idx_cliente_activo  ON cliente (activo) WHERE activo = TRUE;
 
 -- ── Tabla: tipo_cuenta ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS tipo_cuenta (
@@ -41,13 +40,16 @@ INSERT INTO tipo_cuenta (id, nombre, descripcion) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ── Tabla: cuenta ────────────────────────────────────────────
+-- No FK on cliente_id: events may arrive in any order, so the cuenta
+-- row can land before its owner cliente row. Filtering by cliente_id
+-- still works once both have been materialised.
 CREATE TABLE IF NOT EXISTS cuenta (
     id              UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-    numero_cuenta   VARCHAR(20)     NOT NULL UNIQUE,
-    cliente_id      UUID            NOT NULL REFERENCES cliente(id),
-    tipo_cuenta_id  SMALLINT        NOT NULL REFERENCES tipo_cuenta(id),
-    saldo           NUMERIC(18, 2)  NOT NULL DEFAULT 0.00 CHECK (saldo >= 0),
-    estado          VARCHAR(20)     NOT NULL DEFAULT 'ACTIVA' CHECK (estado IN ('ACTIVA','INACTIVA','BLOQUEADA')),
+    numero_cuenta   VARCHAR(20),
+    cliente_id      UUID,
+    tipo_cuenta_id  SMALLINT        REFERENCES tipo_cuenta(id),
+    saldo           NUMERIC(18, 2)  NOT NULL DEFAULT 0.00,
+    estado          VARCHAR(20)     NOT NULL DEFAULT 'ACTIVA',
     fecha_apertura  DATE            NOT NULL DEFAULT CURRENT_DATE,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
@@ -55,13 +57,11 @@ CREATE TABLE IF NOT EXISTS cuenta (
     updated_by      VARCHAR(100)    NOT NULL DEFAULT 'SYSTEM'
 );
 
-COMMENT ON COLUMN cuenta.saldo IS 'Saldo transaccional — se gestiona en la capa de aplicación';
+CREATE INDEX IF NOT EXISTS idx_cuenta_cliente_id ON cuenta (cliente_id);
+CREATE INDEX IF NOT EXISTS idx_cuenta_estado     ON cuenta (estado);
+CREATE INDEX IF NOT EXISTS idx_cuenta_numero     ON cuenta (numero_cuenta);
 
-CREATE INDEX IF NOT EXISTS idx_cuenta_cliente_id   ON cuenta (cliente_id);
-CREATE INDEX IF NOT EXISTS idx_cuenta_estado       ON cuenta (estado);
-CREATE INDEX IF NOT EXISTS idx_cuenta_numero       ON cuenta (numero_cuenta);
-
--- ── Grants (Principio de Menor Privilegio) ───────────────────
+-- ── Grants ───────────────────────────────────────────────────
 GRANT SELECT ON cliente, cuenta, tipo_cuenta TO app_readonly;
 GRANT SELECT, INSERT, UPDATE ON cliente, cuenta TO app_user;
 GRANT SELECT ON tipo_cuenta TO app_user;
