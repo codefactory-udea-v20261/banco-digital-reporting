@@ -115,6 +115,12 @@
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
     </dependency>
+    <!-- Flyway 11 split per-vendor support into separate artifacts; without
+         this, the runtime fails on PostgreSQL 16 with "Unsupported Database". -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
 
     <!-- ── Code generation ───────────────────── -->
     <dependency>
